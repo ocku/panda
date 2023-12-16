@@ -1,6 +1,7 @@
 # Panda
 
 A framework for my upcoming blog.
+![image](https://github.com/ocku/panda/assets/147977941/affbfd9b-87dc-4147-88be-bb01c083d517)
 
 ## Getting started
 
