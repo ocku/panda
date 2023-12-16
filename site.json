@@ -1,0 +1,8 @@
+{
+  "site": {
+    "title": "Panda!",
+    "github": "https://github.com/ocku/panda",
+    "description": "A framework for my upcoming blog.",
+    "url": "http://localhost:3000"
+  }
+}

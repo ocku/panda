@@ -1,0 +1,12 @@
+body > nav {
+  padding-block: 1rem;
+}
+
+body > header {
+  text-align: center;
+  border: 1px solid var(--muted-border-color);
+}
+
+body > header > hgroup, body > header > hgroup > p {
+  margin-bottom: 0;
+}
