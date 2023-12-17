@@ -37,7 +37,7 @@ INDEX_TMP_FILES				:= $(addprefix $(DATA_TMP_DIR)/, index.json \
 INDEX_OUT_FILES				:= $(INDEX_TMP_FILES:$(DATA_TMP_DIR)/%.json=$(ROOT_OUT_DIR)/%.html)
 
 
-panda : $(ROOT_OUT_DIR) $(POST_OUT_FILES) $(INDEX_OUT_FILES)
+panda : $(DATA_TMP_DIR) $(ROOT_OUT_DIR) $(POST_OUT_FILES) $(INDEX_OUT_FILES)
 
 $(ROOT_OUT_DIR)/%.html : $(DATA_TMP_DIR)/%.json $(INDEX_TEMPLATE_FILE)
 	pandoc -s --template $(INDEX_TEMPLATE_FILE) --metadata-file $< -o $@ </dev/null
@@ -47,30 +47,29 @@ $(INDEX_TMP_FILES) : $(DATA_TMP_FILE)
 		--argjson index "$(subst index,0,${@:$(DATA_TMP_DIR)/%.json=%})" \
 		$< > $@
 
-$(DATA_TMP_FILE) : $(DATA_TMP_PART_FILE) | $(SITE_CONF_FILE)
+$(DATA_TMP_FILE) : $(DATA_TMP_PART_FILE) $(SITE_CONF_FILE)
 	jq -s '.[0] * .[1]' $(SITE_CONF_FILE) $< > $@
 
-$(DATA_TMP_PART_FILE): $(POST_TMP_FILES)
+$(DATA_TMP_PART_FILE): $(POST_TMP_FILES) 
 	jq -f $(INDEX_FILTER) --argjson chunkSize $(POSTS_PER_PAGE) \
 		-n $^ > $(DATA_TMP_PART_FILE)
 
-$(POST_TMP_DIR)/%.json : $(POST_SRC_DIR)/%.md $(POST_TMP_DIR) $(DATA_TEMPLATE_FILE) $(SITE_CONF_FILE)
+$(POST_TMP_DIR)/%.json : $(POST_SRC_DIR)/%.md $(DATA_TEMPLATE_FILE) $(SITE_CONF_FILE)
 	pandoc -s $< --template $(DATA_TEMPLATE_FILE) \
 		--metadata-file $(SITE_CONF_FILE) \
 		| jq  -f $(POST_FILTER) --arg path "$(@:$(DATA_TMP_DIR)/%.json=/%)" > $@
 
-$(POST_OUT_DIR)/%.html : $(POST_SRC_DIR)/%.md $(POST_OUT_DIR) $(POST_TEMPLATE_FILE) $(SITE_CONF_FILE) 
+$(POST_OUT_DIR)/%.html : $(POST_SRC_DIR)/%.md $(POST_TEMPLATE_FILE) $(SITE_CONF_FILE)
 	pandoc -s $< --template $(POST_TEMPLATE_FILE) \
 		--metadata-file $(SITE_CONF_FILE) -o $@
 
-$(POST_OUT_DIR):
-	mkdir -pv $@
-
-$(POST_TMP_DIR):
-	mkdir -pv $@
+$(DATA_TMP_DIR):
+	mkdir -p $@
+	mkdir -p $@/$(POST_SRC_DIR)
 
 $(ROOT_OUT_DIR): $(STATIC_FILES)
-	mkdir -pv $@
+	mkdir -p $@
+	mkdir -p $@/$(POST_SRC_DIR)
 	cp -r $(STATIC_DIR)/* $(ROOT_OUT_DIR)
 
 .PHONY: clean
